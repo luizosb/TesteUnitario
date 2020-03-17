@@ -23,26 +23,21 @@ public class LocacaoServiceTest {
 		public ErrorCollector error = new ErrorCollector();  
 	
 		@Test
-		public void testeLocacao() {
+		public void testeLocacao() throws Exception {
 		
 		LocacaoService service = new LocacaoService();
 		Usuario usuario = new Usuario("Luiz");
 		Filme filme = new Filme("Star Wars", 0, 10.0);
 	 
-		Locacao locacao;
-		try {
-			locacao = service.alugarFilme(usuario, filme);
+		Locacao locacao = service.alugarFilme(usuario, filme);
 
 			//verificação
 			//verifique q o valor da locação é 5
-			error.checkThat(locacao.getValor(), is(equalTo(6.0)));
-			error.checkThat(isMesmaData(locacao.getDataLocacao(), new Date()), is(true));
-			error.checkThat(isMesmaData(locacao.getDataRetorno(), DataUtils.obterDataComDiferencaDias(1)), is(false));
-		} catch (Exception e) {
+		error.checkThat(locacao.getValor(), is(equalTo(6.0)));
+		error.checkThat(isMesmaData(locacao.getDataLocacao(), new Date()), is(true));
+		error.checkThat(isMesmaData(locacao.getDataRetorno(), DataUtils.obterDataComDiferencaDias(1)), is(false));
 			// TODO Auto-generated catch block
-			e.printStackTrace();
-			Assert.fail("Não deveria lançar exceção!");
-		}
+		Assert.fail("Não deveria lançar exceção!");
 		
 		
 	}
