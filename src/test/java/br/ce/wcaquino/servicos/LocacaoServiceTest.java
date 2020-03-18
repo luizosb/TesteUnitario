@@ -59,7 +59,7 @@ public class LocacaoServiceTest {
 	}*/
 
 	@Test
-	public void testeLocacao() throws Exception {
+	public void deveAlugarFilme() throws Exception {
 		Usuario usuario = new Usuario("Luiz");
 		List<Filme> filmes = Arrays.asList(new Filme("Star Wars", 2, 10.0));
 
@@ -74,7 +74,7 @@ public class LocacaoServiceTest {
 
 	// metodo elegante
 	@Test(expected = FilmeSemEstoqueException.class)
-	public void testLocacao_filmeSemEstoque() throws Exception {
+	public void naoDeveAlugarFilmesSemEstoque() throws Exception {
 		Usuario usuario = new Usuario("Luiz");
 		List<Filme> filmes = Arrays.asList(new Filme("Star Wars", 2, 10.0));
 
@@ -83,7 +83,7 @@ public class LocacaoServiceTest {
 	
 	//metodo robusta
 	@Test
-	public void testLocacao_usuarioVazio() throws FilmeSemEstoqueException {
+	public void naoDeveAlugarFilmesSemUsuario() throws FilmeSemEstoqueException {
 		List<Filme> filmes = Arrays.asList(new Filme("Star Wars", 2, 10.0));
 
 		try {
@@ -96,13 +96,40 @@ public class LocacaoServiceTest {
 	
 	//metodo nova
 	@Test
-	public void testLocacao_FilmeVazio() throws FilmeSemEstoqueException, LocadoraException {
+	public void naoDeveAlugarFilmesSemFilme() throws FilmeSemEstoqueException, LocadoraException {
 		Usuario usuario = new Usuario("Luiz");
 		
 		exception.expect(LocadoraException.class);
 		exception.expectMessage("Filme vazio");
 		
 		service.alugarFilme(usuario, null);		
+	}
+	
+	@Test
+	public void devePagar75PctFilme3() throws FilmeSemEstoqueException, LocadoraException {
+		Usuario usuario = new Usuario("Luiz");
+		List<Filme> filmes = Arrays.asList(new Filme("Star Wars", 2, 4.0), 
+										   new Filme("Senhor dos Aneis", 3, 6.0),
+										   new Filme("Bee Movie", 7, 8.0));
+		
+		Locacao resultado = service.alugarFilme(usuario, filmes);
+		
+		assertThat(resultado.getValor(), is(16.0));
+					
+	}
+	
+	@Test
+	public void devePagar50PctFilme4() throws FilmeSemEstoqueException, LocadoraException {
+		Usuario usuario = new Usuario("Luiz");
+		List<Filme> filmes = Arrays.asList(new Filme("Star Wars", 2, 4.0), 
+										   new Filme("Senhor dos Aneis", 3, 6.0),
+										   new Filme("Bee Movie", 7, 8.0),
+										   new Filme("Lagoa Azul", 9, 6.0));
+		
+		Locacao resultado = service.alugarFilme(usuario, filmes);
+		
+		assertThat(resultado.getValor(), is(16.0));
+					
 	}
 	
 
