@@ -1,26 +1,36 @@
 package br.ce.wcaquino.servicos;
 
-import static br.ce.wcaquino.utils.DataUtils.isMesmaData;
+import static br.ce.waquino.matchers.MatchersProprios.caiEm;
+import static br.ce.waquino.matchers.MatchersProprios.caiNumaSegunda;
+import static br.ce.waquino.matchers.MatchersProprios.ehHoje;
+import static br.ce.waquino.matchers.MatchersProprios.ehHojeComDiferencaDeDias;
+import static br.ce.wcaquino.builder.FilmeBuilder.umFilmeSemEstoque;
+import static br.ce.wcaquino.builder.FilmeBuilder.umfilme;
+import static br.ce.wcaquino.builder.UsuarioBuilder.umUsuario;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
 import org.junit.rules.ExpectedException;
 
+import br.ce.wcaquino.builder.FilmeBuilder;
 import br.ce.wcaquino.entidades.Filme;
 import br.ce.wcaquino.entidades.Locacao;
 import br.ce.wcaquino.entidades.Usuario;
 import br.ce.wcaquino.exceptions.FilmeSemEstoqueException;
 import br.ce.wcaquino.exceptions.LocadoraException;
 import br.ce.wcaquino.utils.DataUtils;
+import buildermaster.BuilderMaster;
 import junit.framework.Assert;
 
 public class LocacaoServiceTest {
@@ -60,23 +70,27 @@ public class LocacaoServiceTest {
 
 	@Test
 	public void deveAlugarFilme() throws Exception {
-		Usuario usuario = new Usuario("Luiz");
-		List<Filme> filmes = Arrays.asList(new Filme("Star Wars", 2, 10.0));
+		Assume.assumeTrue(DataUtils.verificarDiaSemana(new Date(), Calendar.SATURDAY));
+		
+		Usuario usuario = umUsuario().agora();
+		List<Filme> filmes = Arrays.asList(umfilme().comValor(5.0).agora());
 
 		Locacao locacao = service.alugarFilme(usuario, filmes);
 
 		// verificação
 		// verifique q o valor da locação é 5
 		error.checkThat(locacao.getValor(), is(equalTo(10.0)));
-		error.checkThat(isMesmaData(locacao.getDataLocacao(), new Date()), is(true));
-		error.checkThat(isMesmaData(locacao.getDataRetorno(), DataUtils.obterDataComDiferencaDias(1)), is(true));
+		//error.checkThat(isMesmaData(locacao.getDataLocacao(), new Date()), is(true));
+		error.checkThat(locacao.getDataRetorno(), ehHoje());
+		//error.checkThat(isMesmaData(locacao.getDataRetorno(), obterDataComDiferencaDias(1)), is(true));
+		error.checkThat(locacao.getDataRetorno(), ehHojeComDiferencaDeDias(1));
 	}
 
 	// metodo elegante
 	@Test(expected = FilmeSemEstoqueException.class)
 	public void naoDeveAlugarFilmesSemEstoque() throws Exception {
-		Usuario usuario = new Usuario("Luiz");
-		List<Filme> filmes = Arrays.asList(new Filme("Star Wars", 2, 10.0));
+		Usuario usuario = umUsuario().agora();
+		List<Filme> filmes = Arrays.asList(umFilmeSemEstoque().agora());
 
 		service.alugarFilme(usuario, filmes);
 	}
@@ -84,7 +98,7 @@ public class LocacaoServiceTest {
 	//metodo robusta
 	@Test
 	public void naoDeveAlugarFilmesSemUsuario() throws FilmeSemEstoqueException {
-		List<Filme> filmes = Arrays.asList(new Filme("Star Wars", 2, 10.0));
+		List<Filme> filmes = Arrays.asList(umfilme().agora());
 
 		try {
 			service.alugarFilme(null, filmes);
@@ -97,7 +111,7 @@ public class LocacaoServiceTest {
 	//metodo nova
 	@Test
 	public void naoDeveAlugarFilmesSemFilme() throws FilmeSemEstoqueException, LocadoraException {
-		Usuario usuario = new Usuario("Luiz");
+		Usuario usuario = umUsuario().agora();
 		
 		exception.expect(LocadoraException.class);
 		exception.expectMessage("Filme vazio");
@@ -107,31 +121,64 @@ public class LocacaoServiceTest {
 	
 	@Test
 	public void devePagar75PctFilme3() throws FilmeSemEstoqueException, LocadoraException {
-		Usuario usuario = new Usuario("Luiz");
-		List<Filme> filmes = Arrays.asList(new Filme("Star Wars", 2, 4.0), 
-										   new Filme("Senhor dos Aneis", 3, 6.0),
-										   new Filme("Bee Movie", 7, 8.0));
+		Usuario usuario = umUsuario().agora();
+		List<Filme> filmes = Arrays.asList(umfilme().agora());
 		
 		Locacao resultado = service.alugarFilme(usuario, filmes);
 		
-		assertThat(resultado.getValor(), is(16.0));
+		assertThat(resultado.getValor(), is(4.0));
 					
 	}
 	
 	@Test
 	public void devePagar50PctFilme4() throws FilmeSemEstoqueException, LocadoraException {
-		Usuario usuario = new Usuario("Luiz");
-		List<Filme> filmes = Arrays.asList(new Filme("Star Wars", 2, 4.0), 
-										   new Filme("Senhor dos Aneis", 3, 6.0),
-										   new Filme("Bee Movie", 7, 8.0),
-										   new Filme("Lagoa Azul", 9, 6.0));
+		Usuario usuario = umUsuario().agora();
+		List<Filme> filmes = Arrays.asList(umfilme().agora());
 		
 		Locacao resultado = service.alugarFilme(usuario, filmes);
 		
-		assertThat(resultado.getValor(), is(16.0));
+		assertThat(resultado.getValor(), is(4.0));
 					
 	}
 	
+	@Test
+	public void devePagar25PctFilme5() throws FilmeSemEstoqueException, LocadoraException {
+		Usuario usuario = umUsuario().agora();
+		List<Filme> filmes = Arrays.asList(umfilme().agora());
+		
+		Locacao resultado = service.alugarFilme(usuario, filmes);
+		
+		assertThat(resultado.getValor(), is(4.0));
+	}
+	
+	@Test
+	public void devePagar0PctFilme6() throws FilmeSemEstoqueException, LocadoraException {
+		Usuario usuario = umUsuario().agora();
+		List<Filme> filmes = Arrays.asList(umfilme().agora());
+		
+		Locacao resultado = service.alugarFilme(usuario, filmes);
+		
+		assertThat(resultado.getValor(), is(4.0));
+	}
+	
+	@Test
+	public void deveDevolverNaSegundaAoLugarNoSabado() throws FilmeSemEstoqueException, LocadoraException {
+		Assume.assumeTrue(DataUtils.verificarDiaSemana(new Date(), Calendar.SATURDAY));
+		
+		Usuario usuario = umUsuario().agora();
+		List<Filme> filmes = Arrays.asList(FilmeBuilder.umfilme().agora());	
+		
+		Locacao retorno = service.alugarFilme(usuario, filmes);
+		
+		//assertThat(retorno.getDataRetorno(), new DiaSemanaMatcher(Calendar.MONDAY));
+		//assertThat(retorno.getDataRetorno(), caiEm(Calendar.SUNDAY));
+		assertThat(retorno.getDataRetorno(), caiNumaSegunda());
+		
+	}
+	
+	public static void main(String[] args) {
+		new BuilderMaster().gerarCodigoClasse(Locacao.class);
+	}
 
 	/* metodo robusto
 	@Test
