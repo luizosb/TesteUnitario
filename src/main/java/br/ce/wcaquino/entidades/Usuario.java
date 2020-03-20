@@ -2,6 +2,7 @@ package br.ce.wcaquino.entidades;
 
 public class Usuario {
 
+
 	private String nome;
 	
 	public Usuario() {}
@@ -18,6 +19,11 @@ public class Usuario {
 		this.nome = nome;
 	}
 
+	@Override
+	public String toString() {
+		return "Usuario [nome=" + nome + "]";
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

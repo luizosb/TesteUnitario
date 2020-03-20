@@ -7,6 +7,7 @@ import java.util.Arrays;
 
 import static br.ce.wcaquino.builder.FilmeBuilder.umfilme;
 import static br.ce.wcaquino.builder.UsuarioBuilder.umUsuario;
+import static br.ce.wcaquino.utils.DataUtils.obterDataComDiferencaDias;
 
 import java.lang.Double;
 import java.util.Date;
@@ -62,7 +63,15 @@ public class LocacaoBuilder {
 		return this;
 	}
 
+	public LocacaoBuilder atrasado() {
+		elemento.setDataLocacao(obterDataComDiferencaDias(-4));
+		elemento.setDataRetorno(obterDataComDiferencaDias(-2));
+		return this;
+		
+	}
+
 	public Locacao agora() {
 		return elemento;
 	}
+	
 }
