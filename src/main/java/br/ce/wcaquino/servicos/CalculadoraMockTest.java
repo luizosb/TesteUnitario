@@ -14,6 +14,7 @@ public class CalculadoraMockTest {
 	@Mock
 	private Calculadora calcMock;
 	
+	//Teste de spy
 	@Spy
 	private Calculadora calcSpy;
 	
@@ -22,6 +23,7 @@ public class CalculadoraMockTest {
 		MockitoAnnotations.initMocks(this);
 	}
 	
+	//Spy condições
 	@Test
 	public void devoMostrarDiferencaEntreMockSpy() {
 		Mockito.when(calcMock.somar(1,2)).thenReturn(5);
