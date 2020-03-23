@@ -36,7 +36,6 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import br.ce.wcaquino.builder.FilmeBuilder;
-import br.ce.wcaquino.builder.LocacaoBuilder;
 import br.ce.wcaquino.daos.LocacaoDAO;
 import br.ce.wcaquino.entidades.Filme;
 import br.ce.wcaquino.entidades.Locacao;
@@ -251,7 +250,7 @@ public class LocacaoServiceTest {
 	}
 	
 	@Test
-	public void deveProrrogarUmaLocacao() {
+	public void deveProrrogarUmaLocacao() { 
 		Locacao locacao = umLocacao().agora();
 		
 		service.prorrogarLocacao(locacao, 3);
@@ -262,7 +261,7 @@ public class LocacaoServiceTest {
 		
 		error.checkThat(locacaoRetornada.getValor(), is(12.0));
 		error.checkThat(locacaoRetornada.getDataLocacao(), ehHoje());
-		error.checkThat(locacaoRetornada.getDataLocacao(), ehHojeComDiferencaDeDias(3));
+		error.checkThat(locacaoRetornada.getDataRetorno(), ehHojeComDiferencaDeDias(3));
 	}
 	
 	

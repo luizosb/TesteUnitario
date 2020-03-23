@@ -59,7 +59,7 @@ public class LocacaoService {
 				case 2:	valor = valor * 0.75; break;
 				case 3: valor = valor * 0.50; break;
 				case 4: valor = valor * 0.25; break;
-				case 5: valor = valor * 0.0; break;
+				case 5: valor = valor * 0.0; break; 
 			}
 			valorTotal += valor;
 		}

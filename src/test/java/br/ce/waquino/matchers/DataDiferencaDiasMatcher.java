@@ -1,4 +1,4 @@
-package br.ce.waquino.matchers;
+	package br.ce.waquino.matchers;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -13,15 +13,15 @@ public class DataDiferencaDiasMatcher extends TypeSafeMatcher<Date> {
 
 	private Integer qtdDias;
 	
-	public DataDiferencaDiasMatcher(Integer qtdDias) {
-		
+	public DataDiferencaDiasMatcher(Integer qtdDias) { 
+		this.qtdDias = qtdDias;
 	}
 	
 	
 	public void describeTo(Description desc) {
 		Date dataEsperada = DataUtils.obterDataComDiferencaDias(qtdDias);
-		DateFormat format = new SimpleDateFormat("dd/MM/YYYY");
-		desc.appendText(format.format(dataEsperada));
+		DateFormat formato = new SimpleDateFormat("dd/MM/YYYY");
+		desc.appendText(formato.format(dataEsperada));
 		
 	}
 
