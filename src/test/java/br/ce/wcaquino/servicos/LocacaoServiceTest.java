@@ -7,11 +7,12 @@ import static br.ce.wcaquino.builder.FilmeBuilder.umFilmeSemEstoque;
 import static br.ce.wcaquino.builder.FilmeBuilder.umfilme;
 import static br.ce.wcaquino.builder.LocacaoBuilder.umLocacao;
 import static br.ce.wcaquino.builder.UsuarioBuilder.umUsuario;
-import static br.ce.wcaquino.utils.DataUtils.obterDataComDiferencaDias;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -28,7 +29,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
 import org.junit.rules.ExpectedException;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 import br.ce.wcaquino.builder.FilmeBuilder;
 import br.ce.wcaquino.builder.LocacaoBuilder;
@@ -44,12 +49,14 @@ import junit.framework.Assert;
 
 public class LocacaoServiceTest {
 
+	@InjectMocks
 	private LocacaoService service;
-	
+
+	@Mock
 	private SPCService spc;
-	
+	@Mock
 	private LocacaoDAO dao;
-	
+	@Mock
 	private EmailServices email;
 	
 //	private static int cont = 0;	
@@ -63,15 +70,7 @@ public class LocacaoServiceTest {
 	
 	@Before
 	public void antes() {
-		service = new LocacaoService();
-		dao = Mockito.mock(LocacaoDAO.class);
-		service.setLocacaoDAO(dao);
-		spc = Mockito.mock(SPCService.class);
-		service.setSPCService(spc);
-		email = Mockito.mock(EmailServices.class);
-		service.setEmailService(email);
-	//	cont = cont + 1;
-	//	System.out.println(cont);
+		MockitoAnnotations.initMocks(this);
 	}
 	
 	/*@After
@@ -198,11 +197,11 @@ public class LocacaoServiceTest {
 	}
 	
 	@Test
-	public void naoDeveAlugarFilmeParaNegativadoSPC() throws FilmeSemEstoqueException	 {
+	public void naoDeveAlugarFilmeParaNegativadoSPC() throws Exception	 {
 		Usuario usuario = umUsuario().agora();
 		List<Filme> filmes = Arrays.asList(umfilme().agora());
 		
-		when(spc.possuiNegativacao(usuario)).thenReturn(true);
+		when(spc.possuiNegativacao(Mockito.any(Usuario.class))).thenReturn(true);
 		
 		try {
 			service.alugarFilme(usuario, filmes);
@@ -223,23 +222,54 @@ public class LocacaoServiceTest {
 				Arrays.asList(
 					umLocacao().atrasado().comUsuario(usuario).agora(),
 					umLocacao().comUsuario(usuario2).agora(),
+					umLocacao().atrasado().comUsuario(usuario3).agora(),
 					umLocacao().atrasado().comUsuario(usuario3).agora());
 		when(dao.obterLocacoesPendentes()).thenReturn(locacoes);
 		
 		service.notificarAtrasos();
 		
+		verify(email, times(3)).notificarAtraso(Mockito.any(Usuario.class));
 		verify(email).notificarAtraso(usuario);
-		verify(email).notificarAtraso(usuario3);
+		verify(email, atLeastOnce()).notificarAtraso(usuario3);
 		verify(email, never()).notificarAtraso(usuario2);
 		verifyNoMoreInteractions(email);
 		verifyZeroInteractions(spc);
+	}
+	
+	@Test
+	public void deveTratarErronoSPC()  throws Exception{
+		Usuario usuario = umUsuario().agora();
+		List<Filme> filmes = Arrays.asList(umfilme().agora());
+		
+		when(spc.possuiNegativacao(usuario)).thenThrow(new Exception("Falha grande"));
+		
+		exception.expect(LocadoraException.class);
+		exception.expectMessage("Problemas com SPC, tente novamente");
+		
+		service.alugarFilme(usuario, filmes);
+		
+	}
+	
+	@Test
+	public void deveProrrogarUmaLocacao() {
+		Locacao locacao = umLocacao().agora();
+		
+		service.prorrogarLocacao(locacao, 3);
+		
+		ArgumentCaptor<Locacao> argCapt = ArgumentCaptor.forClass(Locacao.class);
+		Mockito.verify(dao).salvar(argCapt.capture());
+		Locacao locacaoRetornada = argCapt.getValue();
+		
+		error.checkThat(locacaoRetornada.getValor(), is(12.0));
+		error.checkThat(locacaoRetornada.getDataLocacao(), ehHoje());
+		error.checkThat(locacaoRetornada.getDataLocacao(), ehHojeComDiferencaDeDias(3));
 	}
 	
 	
 	public static void main(String[] args) {
 		new BuilderMaster().gerarCodigoClasse(Locacao.class);
 	}
-
+  
 	/* metodo robusto
 	@Test
 	public void testLocacao_filmeSemEstoque2() {
