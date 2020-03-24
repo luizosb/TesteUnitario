@@ -1,5 +1,6 @@
 package br.ce.wcaquino.servicos;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -14,6 +15,13 @@ public class CalculadoraTest {
 	@Before
 	public void antes() {
 		calc = new Calculadora();
+		//System.out.println("paralelizando antes....");
+	}
+	
+	@After
+	public void depois() {
+		calc = new Calculadora();
+		//System.out.println("paralelizando depois....");
 	}
 	
 	@Test
